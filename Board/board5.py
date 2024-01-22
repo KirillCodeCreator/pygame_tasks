@@ -47,7 +47,7 @@ class Board:
             elif cell_data[1] == 1:
                 rect = pygame.Rect((cell_data[0].left + 2, cell_data[0].top + 2, 44, 44))
                 pygame.draw.line(screen, blue_color, rect.topleft, rect.bottomright, 2)
-                pygame.draw.line(screen, blue_color, rect.topright, rect.bottomleft)
+                pygame.draw.line(screen, blue_color, rect.topright, rect.bottomleft, 2)
         pygame.display.update()
 
     def on_click(self, cell):
