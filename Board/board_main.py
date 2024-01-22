@@ -6,6 +6,7 @@ WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 
+
 class Board:
     cells = list()
     cells_colors = list()
@@ -31,7 +32,7 @@ class Board:
         cell_rect = pygame.Surface((self.cell_size, self.cell_size))
         for y in range(self.height):
             for x in range(self.width):
-                r = randint(0,1)
+                r = randint(0, 1)
                 rect = cell_rect.get_rect(topleft=(x * self.cell_size + self.left, y * self.cell_size + self.top))
                 cell_data = (rect, r, (x, y))
                 self.cells.append(cell_data)
@@ -47,14 +48,13 @@ class Board:
             else:
                 pygame.draw.circle(screen, blue_color, cell_data[0].center, self.cell_size / 2 - 3)
 
-    def fill_cells_random(self, screen):
-        for cell in self.cells:
-            pygame.draw.circle(screen, pygame.Color(255, 255, 255), (
-                x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size,
-                self.cell_size), 1)
+    def on_click(self, cell):
+        x, y = cell[0] - self.left, cell[1] - self.top
+        row, col = y // self.cell_size, x // self.cell_size
+        self.board[row][col] = (self.board[row][col] + 1) % 3
 
     def get_click(self, mouse_pos):
-        cell = self.get_cell(mouse_pos)
+        cell = (mouse_pos[0], mouse_pos[1])
         self.on_click(cell)
 
 
