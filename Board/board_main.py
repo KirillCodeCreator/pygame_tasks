@@ -9,8 +9,6 @@ RED = (255, 0, 0)
 
 class Board:
     cells = list()
-    cells_colors = list()
-    colors = list()
 
     def __init__(self, width, height):
         self.width = width
@@ -19,8 +17,6 @@ class Board:
         self.left = 10
         self.top = 10
         self.cell_size = 30
-        self.colors.append(pygame.Color(RED))
-        self.colors.append(pygame.Color(BLUE))
 
     def set_view(self, left, top, cell_size):
         self.left = left
@@ -51,21 +47,33 @@ class Board:
     def on_click(self, cell):
         x, y = cell[0] - self.left, cell[1] - self.top
         row, col = y // self.cell_size, x // self.cell_size
-        self.board[row][col] = (self.board[row][col] + 1) % 3
+        color = self.get_cell_color(col, row)
+        self.set_cells_color(col, row, color)
 
     def get_click(self, mouse_pos):
         cell = (mouse_pos[0], mouse_pos[1])
         self.on_click(cell)
 
+    def set_cells_color(self, col, row, color):
+        for idx, cell in enumerate(self.cells):
+            if cell[2][0] == col or cell[2][1] == row:
+                self.cells[idx] = (cell[0], color, cell[2])
+
+    def get_cell_color(self, col, row):
+        for cell in self.cells:
+            if cell[2][0] == col and cell[2][1] == row:
+                return cell[1]
+
 
 def main():
     n = int(input("Введите размер доски: "))
     pygame.init()
-    size = 500, 500
+    width = 25 + 50 * n + 25
+    size = width, width
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Недореверси')
     board = Board(n, n)
-    board.set_view(50, 50, 55)
+    board.set_view(25, 25, 50)
     running = True
     while running:
         for event in pygame.event.get():
@@ -73,7 +81,6 @@ def main():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 board.get_click(event.pos)
-
         screen.fill((0, 0, 0))
         board.render(screen)
         pygame.display.flip()
