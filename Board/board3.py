@@ -61,6 +61,7 @@ class Board:
         else:
             return 0
 
+
 def main():
     pygame.init()
     width = 25 + 50 * 5 + 25
