@@ -76,7 +76,7 @@ def main():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 board.get_click(event.pos)
-        screen.fill((0, 0, 0))
+        screen.fill(BLACK)
         board.render(screen)
         pygame.display.flip()
     pygame.quit()
