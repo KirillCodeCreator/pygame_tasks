@@ -47,6 +47,8 @@ class Board:
     def on_click(self, cell):
         x, y = cell[0] - self.left, cell[1] - self.top
         row, col = y // self.cell_size, x // self.cell_size
+        if row < 0 or row >= self.height or col < 0 or col >= self.width:
+            return
         color = self.get_cell_color(col, row)
         self.set_cells_color(col, row, color)
 
