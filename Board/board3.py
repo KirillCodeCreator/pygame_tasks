@@ -1,5 +1,3 @@
-from random import randint
-
 import pygame
 
 WHITE = (255, 255, 255)
