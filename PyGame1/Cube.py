@@ -5,11 +5,11 @@ BLACK = (0, 0, 0)
 
 
 def render(screen, w, hue):
-    color1 = pygame.Color(255, 255, 255)
+    color1 = pygame.Color(WHITE)
     hsv = color1.hsva
-    color2 = pygame.Color(255, 255, 255)
+    color2 = pygame.Color(WHITE)
     hsv2 = color2.hsva
-    color3 = pygame.Color(255, 255, 255)
+    color3 = pygame.Color(WHITE)
     hsv3 = color3.hsva
     wx = 130 - (w / 2)
     wy = 180 - (w / 2)
