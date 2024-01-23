@@ -22,7 +22,7 @@ def render(screen, w, n):
         pygame.draw.circle(screen, t[0], (a, a), radius=t[1] * w + w)
 
 
-def start():
+def main():
     try:
         w, n = map(int, input("Введите w - толщину кольца в пикселях и n - количество колец (w и n):  ").split())
     except Exception:
@@ -46,4 +46,4 @@ def start():
 
 
 if __name__ == "__main__":
-    start()
+    main()
