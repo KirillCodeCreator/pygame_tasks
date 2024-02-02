@@ -87,7 +87,8 @@ class Board:
 
 
 class Minesweeper(Board):
-    current_state = 0
+    current_col = -1
+    current_row = -1
 
     def __init__(self, width, height, mines):
         super().__init__(width, height)
@@ -108,7 +109,9 @@ class Minesweeper(Board):
         if row < 0 or row >= self.height or col < 0 or col >= self.width:
             return
         if self.active_cells[row][col] == -1:
-            self.open_cell(row, col)
+            self.current_col = col
+            self.current_row = row
+            self.open_cell()
 
     def mines_near_count(self, system):
         count = 0
@@ -136,7 +139,9 @@ class Minesweeper(Board):
                     real_neighbours.append(n)
         return real_neighbours
 
-    def open_cell(self, row, col):
+    def open_cell(self):
+        row = self.current_row
+        col = self.current_col
         neighbours = self.get_neighbours((row, col))
         count = self.mines_near_count(neighbours)
         self.active_cells[row][col] = count
