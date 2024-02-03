@@ -126,6 +126,10 @@ class Lines(Board):
     red_circle_col = -1
     red_circle_row = -1
 
+    def __init__(self, width, height):
+        super().__init__(width, height)
+        self.active_cells = [[0 for j in range(width)] for i in range(height)]
+
     def is_red_circle(self, row, col):
         return self.active_cells[row][col] == 2
 
@@ -166,10 +170,6 @@ class Lines(Board):
             self.delete_circle(row, col)
             self.create_blue_circle(row, col)
 
-    def __init__(self, width, height):
-        super().__init__(width, height)
-        self.active_cells = [[0 for j in range(width)] for i in range(height)]
-
     def render(self, screen):
         super().render(screen)
 
@@ -183,30 +183,6 @@ class Lines(Board):
     def has_path(self, x1, y1, x2, y2):
         alg = PathAlgoritm(self.active_cells)
         return alg.get_path((x1, y1), (x2, y2))
-
-    def mines_near_count(self, system):
-        count = 0
-        for idx in system:
-            if self.active_cells[idx[0]][idx[1]] == 10:
-                count += 1
-        return count
-
-    def get_neighbours(self, cell, origin):
-        x, y = cell
-        x_o, y_o = origin
-        possible_neighbours = [
-            (x - 1, y),
-            (x + 1, y),
-            (x, y - 1),
-            (x, y + 1)
-        ]
-        real_neighbours = []
-        for n in possible_neighbours:
-            if 0 <= n[0] < self.height:
-                if 0 <= n[1] < self.width:
-                    if n[0] != y_o or n[1] != x_o:
-                        real_neighbours.append(n)
-        return real_neighbours
 
     def render(self, screen):
         black_color = pygame.Color(BLACK)
