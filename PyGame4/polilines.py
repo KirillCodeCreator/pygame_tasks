@@ -90,6 +90,7 @@ class PathAlgoritm:
         self.old = list()
         self.board = board
         self.path = list()
+        self.clock = pygame.time.Clock()
 
     def get_path(self, start, to):
         print(F'add to path {start}')
@@ -97,12 +98,12 @@ class PathAlgoritm:
         self.old.append(start)
         neighbours = self.get_neighbours(start)
         if len(neighbours) == 0:
-            self.path.clear()
             print(F'clear path')
             return False
         if to in neighbours:
             self.path.append(to)
             print(F'get path')
+            x, y = to
             return True
         else:
             for cell in neighbours:
@@ -110,7 +111,6 @@ class PathAlgoritm:
                 if self.board[y][x] == 0 and self.get_path(cell, to):
                     return True
         print(F'clear path')
-        self.path.clear()
         return False
 
     def get_neighbours(self, cell):
@@ -141,7 +141,7 @@ class Lines(Board):
         self.points = list()
         self.prev_point = None
         self.clock = pygame.time.Clock()
-        self.fps = 5
+        self.fps = 2
 
     def is_red_circle(self, row, col):
         return self.active_cells[row][col] == 2
@@ -176,11 +176,11 @@ class Lines(Board):
             if self.exists_red_circle():
                 path = self.has_path(self.red_circle_col, self.red_circle_row, col, row)
                 if path is not None:
-                    #self.delete_circle(self.red_circle_row, self.red_circle_col)
-                    #self.points.clear()
+                    self.delete_circle(self.red_circle_row, self.red_circle_col)
+                    self.points.clear()
                     for i in path:
-                        self.create_white_circle(i[1], i[0])
-                        #self.points.append(i)
+                        #self.create_white_circle(i[1], i[0])
+                        self.points.append(i)
             else:
                 self.points.clear()
                 self.create_blue_circle(row, col)
@@ -209,8 +209,8 @@ class Lines(Board):
 
     def has_path(self, x1, y1, x2, y2):
         alg = PathAlgoritm(self.active_cells)
-        if alg.get_path((x1, y1), (x2, y2)):
-            return alg.path
+        if alg.get_path((x2, y2), (x1, y1)):
+            return list(reversed(alg.path))
         else:
             return None
 
@@ -220,8 +220,8 @@ class Lines(Board):
         blue_color = pygame.Color(BLUE)
         red_color = pygame.Color(RED)
         screen.fill(black_color)
-        '''if len(self.points) > 0:
-            self.show_next_path_point()'''
+        if len(self.points) > 0:
+            self.show_next_path_point()
         for cell_data in self.cells:
             col = cell_data[2][0]
             row = cell_data[2][1]
