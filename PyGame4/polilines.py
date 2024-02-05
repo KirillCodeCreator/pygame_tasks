@@ -84,6 +84,56 @@ class Board:
                 return cell[1]
 
 
+class WaveAlgoritm:
+    def __init__(self, board):
+        self.old = list()
+        self.w = len(board[0])
+        self.h = len(board)
+        self.map = self.read_map(board)
+        self.wayMap = [[0 for j in range(len(board[0]))] for i in range(len(board[0]))]
+        self.clock = pygame.time.Clock()
+
+    def read_map(self, board):
+        map = [[0 for j in range(self.w)] for i in range(self.h)]
+        for row in range(0, len(board)):
+            for col in range(0, len(board[0])):
+                if board[row][col] != 1:
+                    map[row][col] = 0
+                else:
+                    map[row][col] = 1
+        return map
+
+    def FindWave(self, x1, y1, x2, y2):
+        add = True
+        cMap = [[0 for j in range(self.w)] for i in range(self.h)]
+        x = y = step = 0
+        for y in range (self.h):
+            for x in range (self.w):
+                if self.map[y][x] == 1:
+                    cMap[y][x] = -2; #индикатор стены
+                else:
+                    cMap[y][x] = -1; #индикатор еще не ступали сюда
+        cMap[y2][x2] = 0 #Начинаем с финиша
+        while add == True:
+            add = False
+            for y in range(self.h):
+                for x in range(self.w):
+                    if cMap[x][y] == step: #Ставим значение шага+1 в соседние ячейки (если они проходимы)
+                        if y - 1 >= 0 and cMap[x - 1][y] != -2 and cMap[x - 1][y] == -1:
+                            cMap[x - 1][y] = step + 1
+                        if x - 1 >= 0 and cMap[x][y - 1] != -2 and cMap[x][y - 1] == -1:
+                            cMap[x][y - 1] = step + 1
+                        if y + 1 < self.w and cMap[x + 1][y] != -2 and cMap[x + 1][y] == -1:
+                            cMap[x + 1][y] = step + 1
+                        if x + 1 < self.h and cMap[x][y + 1] != -2 and cMap[x][y + 1] == -1:
+                            cMap[x][y + 1] = step + 1
+            step += 1
+            add = True
+            if cMap[y1][x1] != -1: #решение найдено
+                add = False
+            if step > self.w * self.h: #решение не найдено
+                add = False
+
 class PathAlgoritm:
 
     def __init__(self, board):
@@ -91,8 +141,13 @@ class PathAlgoritm:
         self.board = board
         self.path = list()
         self.clock = pygame.time.Clock()
+        self.step = 0
+        self.max_step = len(board) * len(board[0])
 
     def get_path(self, start, to):
+        self.step += 1
+        if self.step > self.max_step:  # решение не найдено
+            return False
         print(F'add to path {start}')
         self.path.append(start)
         self.old.append(start)
@@ -130,6 +185,87 @@ class PathAlgoritm:
                     real_neighbours.append(cell)
         return real_neighbours
 
+class PathAlgoritm2:
+
+    def __init__(self, board):
+        self.old = list()
+        self.w = len(board[0])
+        self.h = len(board)
+        self.map = self.read_map(board)
+        self.path = list()
+        self.clock = pygame.time.Clock()
+        self.step = 0
+        self.max_step = len(board) * len(board[0])
+        print('========start===============')
+
+    def read_map(self, board):
+        map = [[0 for j in range(self.h)] for i in range(self.w)]
+        for row in range(0, self.h):
+            for col in range(0, self.w):
+                if board[row][col] != 1:
+                    map[row][col] = 0
+                else:
+                    map[row][col] = 1
+        return map
+
+    def get_path(self, start, to):
+        if self.step == 0:
+            print(f"from {start} to {to}")
+        else:
+            self.path.append(start)
+            print(F'add to path {start}')
+        if self.step > self.max_step:  # решение не найдено
+            return False
+        self.step += 1
+        self.old.append(start)
+        if start == to: #прибыли в точку назначения
+            print('finish')
+            return True
+        x = y = -1
+        if start[0] - to[0] == 0 and start[1] - to[1] > 0: # на одной оси x и вверх по y
+            x, y = (start[0] , start[1] - 1)
+        elif start[0] - to[0] == 0 and start[1] - to[1] < 0: # на одной оси x и вниз по y
+            x, y = (start[0] , start[1] + 1)
+        elif start[1] - to[1] == 0 and start[0] - to[0] > 0:
+            x, y = (start[0] - 1, start[1])
+        elif start[1] - to[1] == 0 and start[0] - to[0] < 0:
+            x, y = (start[0] + 1, start[1])
+
+        if x != -1 and y != -1 and self.map[y][x] == 0:
+            if self.get_path((x, y), to):
+                return True
+        else:
+            neighbours = self.get_neighbours(start)
+            if len(neighbours) == 0:
+                print('not found neighbours')
+                return False
+            print(F'found neighbours {neighbours}')
+            for cell in neighbours:
+                x, y = cell
+                if self.map[y][x] == 0 and self.get_path(cell, to):
+                    return True
+                    print(F'found next path point {cell}')
+            return False
+
+    def get_neighbours(self, cell):
+        x, y = cell
+        possible_neighbours = [
+            (x - 1, y),
+            (x + 1, y),
+            (x, y - 1),
+            (x, y + 1)
+        ]
+        if possible_neighbours in self.old:
+            for i in possible_neighbours:
+                self.old.remove(i)
+        real_neighbours = []
+        for cell in possible_neighbours:
+            if 0 <= cell[0] < self.w:
+                if 0 <= cell[1] < self.h:
+                    if cell in self.old or self.map[cell[1]][cell[0]] == 1:
+                        continue
+                    real_neighbours.append(cell)
+        return real_neighbours
 
 class Lines(Board):
     red_circle_col = -1
@@ -162,6 +298,7 @@ class Lines(Board):
 
     def create_blue_circle(self, row, col):
         self.active_cells[row][col] = 1
+
     def create_white_circle(self, row, col):
         self.active_cells[row][col] = 8
 
@@ -179,7 +316,6 @@ class Lines(Board):
                     self.delete_circle(self.red_circle_row, self.red_circle_col)
                     self.points.clear()
                     for i in path:
-                        #self.create_white_circle(i[1], i[0])
                         self.points.append(i)
             else:
                 self.points.clear()
@@ -195,7 +331,7 @@ class Lines(Board):
             c, r = self.prev_point
             self.delete_circle(r, c)
         self.prev_point = self.points[0]
-        col, row  = self.points[0]
+        col, row = self.points[0]
         self.points.remove(self.prev_point)
         self.create_blue_circle(row, col)
         self.clock.tick(self.fps)
@@ -208,11 +344,13 @@ class Lines(Board):
         self.create_circle(row, col)
 
     def has_path(self, x1, y1, x2, y2):
-        alg = PathAlgoritm(self.active_cells)
-        if alg.get_path((x2, y2), (x1, y1)):
-            return list(reversed(alg.path))
-        else:
-            return None
+        alg = WaveAlgoritm(self.active_cells)
+        alg.FindWave(x1, y1, x2, y2)
+        #alg = PathAlgoritm2(self.active_cells)
+        #if alg.get_path((x1, y1), (x2, y2)):
+            #return alg.path
+        #else:
+            #return None
 
     def render(self, screen):
         black_color = pygame.Color(BLACK)
