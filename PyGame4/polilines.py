@@ -84,51 +84,80 @@ class Board:
                 return cell[1]
 
 
-class PathAlgoritm:
-
+class WaveAlgoritm:
     def __init__(self, board):
-        self.old = list()
-        self.board = board
-        self.path = list()
+        self.w = len(board[0])
+        self.h = len(board)
+        self.px = [0] * self.w * self.h
+        self.py = [0] * self.h * self.w
+        self.wall = -1
+        self.blank = -2
+        self.len = 0
+        self.grid = self.create_map(board)
+        self.clock = pygame.time.Clock()
 
-    def get_path(self, start, to):
-        print(F'add to path {start}')
-        self.path.append(start)
-        self.old.append(start)
-        neighbours = self.get_neighbours(start)
-        if len(neighbours) == 0:
-            self.path.clear()
-            print(F'clear path')
-            return False
-        if to in neighbours:
-            self.path.append(to)
-            print(F'get path')
-            return True
-        else:
-            for cell in neighbours:
-                x, y = cell
-                if self.board[y][x] == 0 and self.get_path(cell, to):
-                    return True
-        print(F'clear path')
-        self.path.clear()
-        return False
+    def create_map(self, board):
+        map = [[0 for j in range(self.w)] for i in range(self.h)]
+        for y in range(0, self.h):
+            for x in range(0, self.w):
+                if board[y][x] != 1:
+                    map[y][x] = self.blank
+                else:
+                    map[y][x] = self.wall
+        return map
 
-    def get_neighbours(self, cell):
-        x, y = cell
+    def get_neighbours(self, y, x, value):
         possible_neighbours = [
-            (x - 1, y),
-            (x + 1, y),
-            (x, y - 1),
-            (x, y + 1)
+            (y, x - 1),
+            (y, x + 1),
+            (y - 1, x),
+            (y + 1, x)
         ]
         real_neighbours = []
         for cell in possible_neighbours:
-            if 0 <= cell[0] < len(self.board):
-                if 0 <= cell[1] < len(self.board[0]):
-                    if cell in self.old:
-                        continue
-                    real_neighbours.append(cell)
+            iy, ix = cell
+            if 0 <= iy < self.h and 0 <= ix < self.w and self.grid[iy][ix] == value:
+                real_neighbours.append(cell)
         return real_neighbours
+
+    def find_wave(self, ax, ay, bx, by):
+        stop = False
+
+        if self.grid[ay][ax] == self.wall or self.grid[by][bx] == self.wall:
+            return False
+        step = 0
+        self.grid[ay][ax] = step
+        while stop == False and self.grid[by][bx] == self.blank:
+            stop = True
+            for y in range(0, self.h):
+                for x in range(0, self.w):
+                    if self.grid[y][x] == step:
+                        neighbours = self.get_neighbours(y, x, self.blank)
+                        for cell in neighbours:
+                            iy, ix = cell
+                            stop = False
+                            self.grid[iy][ix] = step + 1
+            step += 1
+        if self.grid[by][bx] == self.blank:
+            return False
+        self.len = self.grid[by][bx]
+        x = bx
+        y = by
+        d = self.len
+        while d > 0:
+            self.px[d] = x
+            self.py[d] = y
+            d -= 1
+            neighbours = self.get_neighbours(y, x, d)
+            for cell in neighbours:
+                iy, ix = cell
+                if self.grid[iy][ix] == d:
+                    x = ix
+                    y = iy
+                    break
+        self.px[0] = ax
+        self.py[0] = ay
+        return True
 
 
 class Lines(Board):
@@ -141,7 +170,7 @@ class Lines(Board):
         self.points = list()
         self.prev_point = None
         self.clock = pygame.time.Clock()
-        self.fps = 5
+        self.fps = 7
 
     def is_red_circle(self, row, col):
         return self.active_cells[row][col] == 2
@@ -162,6 +191,7 @@ class Lines(Board):
 
     def create_blue_circle(self, row, col):
         self.active_cells[row][col] = 1
+
     def create_white_circle(self, row, col):
         self.active_cells[row][col] = 8
 
@@ -176,11 +206,10 @@ class Lines(Board):
             if self.exists_red_circle():
                 path = self.has_path(self.red_circle_col, self.red_circle_row, col, row)
                 if path is not None:
-                    #self.delete_circle(self.red_circle_row, self.red_circle_col)
-                    #self.points.clear()
+                    self.delete_circle(self.red_circle_row, self.red_circle_col)
+                    self.points.clear()
                     for i in path:
-                        self.create_white_circle(i[1], i[0])
-                        #self.points.append(i)
+                        self.points.append(i)
             else:
                 self.points.clear()
                 self.create_blue_circle(row, col)
@@ -195,7 +224,7 @@ class Lines(Board):
             c, r = self.prev_point
             self.delete_circle(r, c)
         self.prev_point = self.points[0]
-        col, row  = self.points[0]
+        col, row = self.points[0]
         self.points.remove(self.prev_point)
         self.create_blue_circle(row, col)
         self.clock.tick(self.fps)
@@ -208,9 +237,13 @@ class Lines(Board):
         self.create_circle(row, col)
 
     def has_path(self, x1, y1, x2, y2):
-        alg = PathAlgoritm(self.active_cells)
-        if alg.get_path((x1, y1), (x2, y2)):
-            return alg.path
+        alg = WaveAlgoritm(self.active_cells)
+        if alg.find_wave(x1, y1, x2, y2):
+            points = list()
+            for i in range(1, alg.len):
+                points.append((alg.px[i], alg.py[i]))
+            points.append((x2, y2))
+            return points
         else:
             return None
 
@@ -220,8 +253,8 @@ class Lines(Board):
         blue_color = pygame.Color(BLUE)
         red_color = pygame.Color(RED)
         screen.fill(black_color)
-        '''if len(self.points) > 0:
-            self.show_next_path_point()'''
+        if len(self.points) > 0:
+            self.show_next_path_point()
         for cell_data in self.cells:
             col = cell_data[2][0]
             row = cell_data[2][1]
@@ -229,8 +262,6 @@ class Lines(Board):
                 pygame.draw.circle(screen, blue_color, cell_data[0].center, 16)
             elif self.active_cells[row][col] == 2:
                 pygame.draw.circle(screen, red_color, cell_data[0].center, 16)
-            elif self.active_cells[row][col] == 8:
-                pygame.draw.circle(screen, white_color, cell_data[0].center, 16)
             pygame.draw.rect(screen, white_color, cell_data[0], 1)
         pygame.display.update()
 
