@@ -83,6 +83,7 @@ class Board:
             if cell[2][0] == col and cell[2][1] == row:
                 return cell[1]
 
+
 class WaveAlgoritm:
     def __init__(self, board):
         self.w = len(board[0])
@@ -116,32 +117,32 @@ class WaveAlgoritm:
         for cell in possible_neighbours:
             iy, ix = cell
             if 0 <= iy < self.h and 0 <= ix < self.w and self.grid[iy][ix] == value:
-                    real_neighbours.append(cell)
+                real_neighbours.append(cell)
         return real_neighbours
 
     def find_wave(self, ax, ay, bx, by):
-        dx = [1, 0, -1, 0]   #смещения, соответствующие соседям ячейки
-        dy = [0, 1, 0, -1];   #справа, снизу, слева и сверху
+        dx = [1, 0, -1, 0]  # смещения, соответствующие соседям ячейки
+        dy = [0, 1, 0, -1];  # справа, снизу, слева и сверху
         stop = False
 
-        if self.grid[ay][ax] == self.wall or self.grid[by][bx] == self.wall: #ячейка (ax, ay) или (bx, by) - стена
+        if self.grid[ay][ax] == self.wall or self.grid[by][bx] == self.wall:  # ячейка (ax, ay) или (bx, by) - стена
             return False
         step = 0
-        self.grid[ay][ax] = step #стартовая ячейка помечена 0
+        self.grid[ay][ax] = step  # стартовая ячейка помечена 0
         while stop == False and self.grid[by][bx] == self.blank:
-            stop = True #предполагаем, что все свободные клетки уже помечены
+            stop = True  # предполагаем, что все свободные клетки уже помечены
             for y in range(0, self.h):
                 for x in range(0, self.w):
-                    if self.grid[y][x] == step:    #ячейка (x, y) помечена числом d
+                    if self.grid[y][x] == step:  # ячейка (x, y) помечена числом d
                         neighbours = self.get_neighbours(y, x, self.blank)
                         for cell in neighbours:  # проходим по всем непомеченным соседям
                             iy, ix = cell
-                            stop = False #найдены непомеченные клетки
-                            self.grid[iy][ix] = step + 1 #распространяем волну
+                            stop = False  # найдены непомеченные клетки
+                            self.grid[iy][ix] = step + 1  # распространяем волну
             step += 1
         if self.grid[by][bx] == self.blank:
-            return False #путь не найден
-        self.len = self.grid[by][bx] #длина кратчайшего пути из(ax, ay) в (bx, by)
+            return False  # путь не найден
+        self.len = self.grid[by][bx]  # длина кратчайшего пути из(ax, ay) в (bx, by)
         x = bx
         y = by
         d = self.len
@@ -154,11 +155,12 @@ class WaveAlgoritm:
                 iy, ix = cell
                 if self.grid[iy][ix] == d:
                     x = ix
-                    y = iy #переходим в ячейку, которая на 1 ближе к старту
+                    y = iy  # переходим в ячейку, которая на 1 ближе к старту
                     break
         self.px[0] = ax
-        self.py[0] = ay #теперь px[0..len] и py[0..len] - координаты ячеек пути
+        self.py[0] = ay  # теперь px[0..len] и py[0..len] - координаты ячеек пути
         return True
+
 
 class Lines(Board):
     red_circle_col = -1
