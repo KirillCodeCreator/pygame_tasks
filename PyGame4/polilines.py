@@ -121,28 +121,26 @@ class WaveAlgoritm:
         return real_neighbours
 
     def find_wave(self, ax, ay, bx, by):
-        dx = [1, 0, -1, 0]  # смещения, соответствующие соседям ячейки
-        dy = [0, 1, 0, -1];  # справа, снизу, слева и сверху
         stop = False
 
-        if self.grid[ay][ax] == self.wall or self.grid[by][bx] == self.wall:  # ячейка (ax, ay) или (bx, by) - стена
+        if self.grid[ay][ax] == self.wall or self.grid[by][bx] == self.wall:
             return False
         step = 0
-        self.grid[ay][ax] = step  # стартовая ячейка помечена 0
+        self.grid[ay][ax] = step
         while stop == False and self.grid[by][bx] == self.blank:
-            stop = True  # предполагаем, что все свободные клетки уже помечены
+            stop = True
             for y in range(0, self.h):
                 for x in range(0, self.w):
-                    if self.grid[y][x] == step:  # ячейка (x, y) помечена числом d
+                    if self.grid[y][x] == step:
                         neighbours = self.get_neighbours(y, x, self.blank)
-                        for cell in neighbours:  # проходим по всем непомеченным соседям
+                        for cell in neighbours:
                             iy, ix = cell
-                            stop = False  # найдены непомеченные клетки
-                            self.grid[iy][ix] = step + 1  # распространяем волну
+                            stop = False
+                            self.grid[iy][ix] = step + 1
             step += 1
         if self.grid[by][bx] == self.blank:
-            return False  # путь не найден
-        self.len = self.grid[by][bx]  # длина кратчайшего пути из(ax, ay) в (bx, by)
+            return False
+        self.len = self.grid[by][bx]
         x = bx
         y = by
         d = self.len
@@ -151,14 +149,14 @@ class WaveAlgoritm:
             self.py[d] = y
             d -= 1
             neighbours = self.get_neighbours(y, x, d)
-            for cell in neighbours:  # проходим по всем непомеченным соседям
+            for cell in neighbours:
                 iy, ix = cell
                 if self.grid[iy][ix] == d:
                     x = ix
-                    y = iy  # переходим в ячейку, которая на 1 ближе к старту
+                    y = iy
                     break
         self.px[0] = ax
-        self.py[0] = ay  # теперь px[0..len] и py[0..len] - координаты ячеек пути
+        self.py[0] = ay
         return True
 
 
