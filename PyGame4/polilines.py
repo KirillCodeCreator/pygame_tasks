@@ -172,7 +172,7 @@ class Lines(Board):
         self.points = list()
         self.prev_point = None
         self.clock = pygame.time.Clock()
-        self.fps = 4
+        self.fps = 7
 
     def is_red_circle(self, row, col):
         return self.active_cells[row][col] == 2
