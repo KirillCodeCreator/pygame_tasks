@@ -123,12 +123,18 @@ class PathAlgoritm:
 
 
 class Lines(Board):
-    red_circle_col = -1
-    red_circle_row = -1
 
     def __init__(self, width, height):
         super().__init__(width, height)
         self.active_cells = [[0 for j in range(width)] for i in range(height)]
+
+    def get_red_circle_coords(self):
+        for cell_data in self.cells:
+            col = cell_data[2][0]
+            row = cell_data[2][1]
+            if self.is_red_circle(row, col):
+                return (row, col)
+        return (-1, -1)
 
     def is_red_circle(self, row, col):
         return self.active_cells[row][col] == 2
@@ -140,27 +146,24 @@ class Lines(Board):
         return self.active_cells[row][col] == 0
 
     def exists_red_circle(self):
-        return self.red_circle_col > -1 and self.red_circle_row > -1
+        row, col = self.get_red_circle_coords()
+        return row > -1 and col > -1
 
     def create_red_circle(self, row, col):
         self.active_cells[row][col] = 2
-        self.red_circle_col = col
-        self.red_circle_row = row
 
     def create_blue_circle(self, row, col):
         self.active_cells[row][col] = 1
 
     def delete_circle(self, row, col):
-        if self.is_red_circle(row, col):
-            self.red_circle_col = -1
-            self.red_circle_row = -1
         self.active_cells[row][col] = 0
 
     def create_circle(self, row, col):
         if self.is_empty_cell(row, col):
             if self.exists_red_circle():
-                if self.has_path(self.red_circle_col, self.red_circle_row, col, row):
-                    self.delete_circle(self.red_circle_row, self.red_circle_col)
+                red_circle_row, red_circle_col = self.get_red_circle_coords()
+                if self.has_path(red_circle_col, red_circle_row, col, row):
+                    self.delete_circle(red_circle_row, red_circle_col)
                     self.create_blue_circle(row, col)
             else:
                 self.create_blue_circle(row, col)
