@@ -17,8 +17,9 @@ def load_image(name, colorkey=None):
 
 
 pygame.init()
+pygame.display.set_caption('Boom them all — 2')
 width, height = 500, 500
-image_size = 75, 75
+image_size = 70, 70
 size = width, height
 screen = pygame.display.set_mode(size)
 coords = pygame.sprite.Group()
