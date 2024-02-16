@@ -70,8 +70,7 @@ def load_level(filename):
     with open(filename, 'r') as fd:
         level_map = [line.strip() for line in fd]
     max_width = max(map(len, level_map))
-    level_map = [i.ljust(max_width, '.') for i in level_map]
-    return level_map
+    return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
 
 
 tile_images = {
@@ -95,11 +94,12 @@ class Tile(pygame.sprite.Sprite):
 
 
 class Player(pygame.sprite.Sprite):
+    step = 50
 
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
-        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 15 + self.step, tile_height * pos_y + 5 + self.step)
 
     def move(self, dx, dy):
         self.rect.x += dx
@@ -126,13 +126,14 @@ def generate_level(level):
                 new_player = Player(x, y)
                 player_start_x = new_player.rect.x
                 player_start_y = new_player.rect.y
+                level[y][x] = '.'
     return new_player, x, y
 
 
 def select_map_level():
     intro_text = ["Выберите уровень", '',
                   "В консоли введите имя файла с расширением",
-                  "'level1.txt' или 'level2.txt' или 'level3.txt'"]
+                  "'level1.txt' или 'level2.txt' или 'level3.txt' или 'level4.txt'"]
     fon = pygame.transform.scale(load_image('fon.jpg'), size)
     screen.blit((fon), (0, 0))
     font = pygame.font.Font(None, 30)
